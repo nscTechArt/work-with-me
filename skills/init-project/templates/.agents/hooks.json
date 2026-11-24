@@ -1,0 +1,16 @@
+{
+  "repo-policy-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command|edit_file|write_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -B ./scripts/pre_tool_guard.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
