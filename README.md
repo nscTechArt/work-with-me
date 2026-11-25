@@ -86,8 +86,8 @@
 | Skill | 触发 | 作用 |
 |---|---|---|
 | [`code-review`](skills/code-review/SKILL.md) | 自动 | 对照 `AGENTS.md`、`docs/` 与 `.scratch/` 审查未提交改动、历史提交或分支 |
-| [`patch-or-fresh`](skills/patch-or-fresh/SKILL.md) | 手动 | 按 `AGENTS.md` 检查改动像重写还是打补丁，并给出更干净的改法 |
-| [`refine`](skills/refine/SKILL.md) | 手动 | 不改变行为的前提下，局部精简选定范围的代码，并复用仓库已有实现 |
+| [`patch-or-fresh`](skills/patch-or-fresh/SKILL.md) | 手动 | 按 `AGENTS.md` 检查改动像重写还是打补丁，直接重塑范围内安全的补丁接缝 |
+| [`refine`](skills/refine/SKILL.md) | 手动 | 保持预期行为的前提下，局部精简选定范围的代码、复用仓库已有实现，并直接修复范围内已查实的缺陷 |
 | [`reclaim-code-entropy`](skills/reclaim-code-entropy/SKILL.md) | 手动 | 对照 `docs/` 里的产品边界与模块契约，排查或彻底清理废弃代码和重复定义 |
 
 ### 会话辅助
