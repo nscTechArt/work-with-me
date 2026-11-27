@@ -9,11 +9,14 @@ description: Disposable specs (spec.md) and multi-session tickets (issues/) unde
 
 ## Spec (`.scratch/<slug>/spec.md`)
 
-Write a spec only when work spans multiple seams or carries high design or rework risk; skip it for local single-session work.
+Write a spec only when work spans multiple seams or carries high design or rework risk; skip it for local single-session work. Keep `spec.md` **short by omission, not compression**:
 
-Ground every load-bearing claim against current code at `HEAD` (following `docs/evidence-model.md` if present, otherwise citing inspected `file:line` or marking unknowns explicitly). Define the goal, concrete contracts (inputs, outputs, formats, ownership, ordering), acceptance evidence (per `docs/testing.md` if present, otherwise choosing the cheapest reliable lock and requiring blind spot, independent oracle, and stable interface for permanent tests), out-of-scope exclusions, and any departed module-doc decisions with verified reasons. When `.scratch/<slug>/research.md` exists, resolve its unresolved claims, finalize departures from adopted references, and cite `research.md` or exact source locations directly instead of copying rationale. Keep each rule in one owning section and link to it elsewhere instead of restating it.
+- **Scope:** define the goal, out-of-scope exclusions, concrete **cross-seam contracts** (inputs, outputs, formats, ownership, ordering, invariants), departed module-doc decisions with verified reasons, and acceptance evidence (per `docs/testing.md` if present, otherwise choose the cheapest reliable lock and require a blind spot, independent oracle, and stable interface for permanent tests).
+- **Omit single-unit internals:** leave local algorithm steps, helper math, and tuning constants to code unless they cross a seam or depart from a cited source.
+- **Single owner:** define each contract or rule in one owning section and link to it elsewhere.
+- **Grounding:** verify every load-bearing claim against current code at `HEAD` (per `docs/evidence-model.md` if present, otherwise cite inspected `file:line` or mark unknowns explicitly). When `.scratch/<slug>/research.md` exists, resolve its unresolved claims, finalize departures from adopted references, and cite `research.md` or exact source locations directly.
 
-Explicitly specify three failure-prone boundaries whenever they apply:
+Specify three failure-prone boundaries whenever they apply:
 
 - **Traced cross-seam values:** trace every introduced or changed value crossing a seam (e.g., config/serializer to runtime, CPU to GPU) through conversions to consumer use at `HEAD` (units, ranges, encodings, scale, packing, defaults).
 - **Edge states:** define inputs and outputs for first use, reset, resize, retry, empty/missing/invalid/non-finite inputs, and out-of-range outputs.
@@ -23,15 +26,15 @@ Update `spec.md` during implementation only when a contract changes while open d
 
 ## Tickets (`.scratch/<slug>/issues/<NN>-<ticket-slug>.md`)
 
-Split into numbered self-contained vertical slices from `01` covering every spec contract only when implementation spans multiple sessions. Propose the slice breakdown briefly before writing ticket files if the split itself has meaningful ordering trade-offs.
+Split into numbered, independently deliverable vertical slices from `01` covering every spec contract only when implementation spans multiple sessions. Propose the slice breakdown briefly before writing ticket files if the split has meaningful ordering trade-offs.
 
 Each ticket tracks:
 
-- `Status: open | done` (use `done` once implementation and the repository's required verification pass: local checks when allowed, or static review with any pending manual runtime check noted).
+- `Status: open | done` (mark `done` once implementation and the repository's required verification pass: local checks when allowed, or static review with any pending manual runtime check noted).
 - `Blocked by:` acyclic producer-to-consumer ticket dependencies, or `None`.
-- Concrete code entry points at `HEAD` and pointers to owning `spec.md` (and `research.md`, if present) sections (do not duplicate spec tables or thresholds).
+- Concrete code entry points at `HEAD`, links to owning sections in `spec.md` for all contracts, tables, and thresholds, and links to `research.md` only for background or external reference context.
 - Smallest acceptance evidence per `docs/testing.md` (or cheapest decisive verification).
-- On completion, append delivered symbols, interfaces, and files so downstream tickets stay grounded.
+- Delivered symbols, interfaces, and files, appended on completion so downstream tickets stay grounded.
 
 ## Close-Out
 
