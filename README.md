@@ -76,6 +76,7 @@
 | Skill | 触发 | 作用 |
 |---|---|---|
 | [`before-we-start`](skills/before-we-start/SKILL.md) | 自动 | 动手前先查清事实，只把关键取舍拿出来对齐 |
+| [`patch-or-fresh`](skills/patch-or-fresh/SKILL.md) | 手动 | 改动开始前对比“沿旧结构打补丁”与“按当前需求重塑”的代价和波及面，先定路线和范围再动工 |
 | [`codebase-design`](skills/codebase-design/SKILL.md) | 自动 | 设计高内聚的模块接口与抽象边界，合并过薄的封装层，并在高返工场景下对比候选接口方案 |
 | [`spec-authoring`](skills/spec-authoring/SKILL.md) | 自动 | 在 `.scratch/<slug>/` 下撰写临时方案 `spec.md` 与跨会话任务单 `issues/` |
 | [`spec-review`](skills/spec-review/SKILL.md) | 手动 | 写代码前对照 `AGENTS.md` 与 `docs/`，单轮审查 `.scratch/<slug>/` 里的契约与任务单 |
@@ -86,7 +87,6 @@
 | Skill | 触发 | 作用 |
 |---|---|---|
 | [`code-review`](skills/code-review/SKILL.md) | 自动 | 对照 `AGENTS.md`、`docs/` 与 `.scratch/` 审查未提交改动、历史提交或分支 |
-| [`patch-or-fresh`](skills/patch-or-fresh/SKILL.md) | 手动 | 按 `AGENTS.md` 检查改动像重写还是打补丁，直接重塑范围内安全的补丁接缝 |
 | [`refine`](skills/refine/SKILL.md) | 手动 | 保持预期行为的前提下，局部精简选定范围的代码、复用仓库已有实现，并直接修复范围内已查实的缺陷 |
 | [`reclaim-code-entropy`](skills/reclaim-code-entropy/SKILL.md) | 手动 | 对照 `docs/` 里的产品边界与模块契约，排查或彻底清理废弃代码和重复定义 |
 

@@ -1,41 +1,48 @@
 ---
 name: patch-or-fresh
-description: Check whether changes read as written fresh or layered patches, and reshape safe in-scope seams directly.
+description: Compare patching existing code against building fresh before editing, and settle the path and scope.
 disable-model-invocation: true
 ---
 
 # Patch or Fresh
 
-Evaluate whether touched code, tests, comments, and docs read as **written fresh** for current requirements rather than patches layered onto legacy shape, and reshape safe in-scope patch seams directly.
+Decide before editing whether an upcoming change belongs on the **patch path** (extending the existing shape in place) or the **fresh path** (reshaping to the design you would author from zero for current requirements), and lock the resulting scope. Stay strictly read-only until the user confirms. Cite inspected files for every mismatch, constraint, caller, sibling, and scope item, and mark anything not read as `uninspected`.
 
-## 1. Resolve target and isolate context
+## 1. Frame the requirement and locked boundaries
 
-Resolve the review target from the caller (staged diff, uncommitted diff against `HEAD`, commit range, or explicit file paths). When omitted, review staged changes (`git diff --cached`) if non-empty; otherwise review uncommitted changes against `HEAD` (`git diff HEAD`) plus untracked files (`git ls-files -o --exclude-standard`). If the resolved target is empty, ask what to review and wait.
+State the upcoming change in one plain sentence describing the behavior and invariants the system needs now, independent of the current code layout. If the requirement is missing or too vague to design from zero, ask one focused question and wait.
 
-Note the enclosing `AGENTS.md` or `CLAUDE.md` path if present, plus the task goal and explicit user constraints (either an originating spec/ticket path or a brief factual summary, never implementation reasoning or conclusions).
+Read the enclosing `AGENTS.md` (or `CLAUDE.md`), `docs/product-scope.md`, and directly relevant architecture docs (when present), plus any declared compatibility boundaries (public APIs, wire formats, persisted schemas). Separate **locked boundaries** (confirmed product rules and compatibility contracts) from internal legacy assumptions that are free to change.
 
-If this session authored or discussed the target change, dispatch Step 2 to a read-only sub-agent with a **fresh context window** (never a fork inheriting parent context), passing only Step 2's instructions, the resolved target, the repo guidance path, and the task goal or spec path. Verify its returned candidates against the current files before editing. If no sub-agent is available, run Step 2 here and note that the review ran without fresh-context isolation.
+## 2. Sketch the fresh shape against reality
 
-## 2. Inspect whole files and filter
+When this session has already proposed a plan, fix, or implementation anchored to existing code, dispatch this step to a read-only sub-agent with a **fresh context window** (never a fork inheriting parent context), passing only this step's instructions, the one-sentence requirement, the locked boundaries, and the target area (omitting prior design or implementation reasoning). Verify returned file claims before Step 3.
 
-Read the enclosing `AGENTS.md` or `CLAUDE.md`, any originating spec or ticket, every touched file in full (not just diff hunks), and directly implicated architecture/design docs or owning test files. From those sources, establish the repo's standards, scope rules, and declared compatibility boundaries (public APIs, wire formats, persisted schemas). Then ask of each touched area: *if authored from zero for current requirements, would it take this shape?*
+Read the target files in full, their direct callers, owning tests, architecture docs, and sibling modules of the same kind. Test recorded rationale in inline comments and docs against current code to separate constraints that still hold from expired assumptions.
 
-Check all four artifact types for patch seams:
+Sketch the **fresh shape**: the cleanest data model, interface, and control flow you would author from zero for the current requirement within locked boundaries. Compare it against current code to identify concrete structural mismatches (expired assumptions, forced special cases, split responsibilities, or mismatched tests and docs).
 
-- **Code:** bolt-on flags or special-case branches, thin wrappers routing around legacy interfaces, unnecessary internal backward compatibility, or leftover dead or duplicate code in scope.
-- **Tests:** tacked-on cases or branches inside legacy fixtures instead of tests shaped around the current contract.
-- **Comments and docs:** appended clauses, spliced sentences, or delta narration ("formerly", "now also", migration notes) instead of direct current-state prose.
+## 3. Price both paths
 
-Filter every candidate before keeping it:
+If the current code already fits the fresh shape with no material structural mismatch, proceed directly to Step 4 with the planned file scope.
 
-- **Verify reasons and boundaries:** verify recorded reasons in inline comments and architecture/design docs against current code, and check declared compatibility boundaries. Drop anything protecting a constraint that still holds or an external compatibility boundary (unless the user explicitly asked to revisit it).
-- **Require real end-state gain:** keep a finding only when the fresh alternative wins clearly on correctness, runtime quality or cost, or long-term simplicity (or the repo's explicit axes). Drop equivalent shapes and style preferences.
-- **Classify scope honestly:** label each kept finding **In scope** (local to this change) or **Beyond task scope** (wider refactor outside this task). Exclude unrelated pre-existing issues outside the touched area.
+Otherwise, base both paths on code facts, leaving future roadmap, experimental risk, and schedule for the user to weigh:
 
-Return each kept finding with `file:line`, the patch seam, the concrete fresh alternative and end-state gain, and its scope label (plus any trade-off or pause trigger); if none remain, state that the change reads as written fresh.
+- **Patch path**: exact landing seam and touched files (including callers, tests, and docs), concrete structural friction added (extra flags, branching, coupling, or awkward abstractions), and whether keeping the existing shape preserves **sibling consistency** across untouched peers or keeps an unvalidated experiment cheap.
+- **Fresh path**: concrete end-state gain (correctness, runtime quality or cost, or long-term simplicity) and full **blast radius** (every file, caller, interface, test, doc, and sibling module that must move together to keep conventions unified).
 
-## 3. Apply safe reshapes and reply
+## 4. Hand off the decision
 
-For review-only requests or committed-history targets (such as a commit range), skip editing and report the kept findings. Otherwise, reshape verified **In scope** findings directly while preserving unrelated local edits. Hold any finding that is **Beyond task scope**, requires a user decision (such as a product or contract trade-off, a locked constraint, revisiting a declared compatibility boundary, or an unauthorized destructive action), or triggers a pause rule in `AGENTS.md` or `CLAUDE.md`. When edits are made, run the smallest meaningful checks permitted by repository instructions and re-inspect the final diff against scope and unrelated local changes.
+Reply concisely in the user's language.
 
-Reply directly and plainly without a formal report template. If the change already reads as written fresh, say so plainly. Otherwise, when edits were made, list each applied reshape (`file:line`, patch seam removed, fresh shape and end-state gain) and the checks run with their outcomes; list any held or review-only findings (`file:line`, patch seam, concrete fresh alternative and gain, scope label, and for held findings, the decision needed or pause trigger).
+When the current shape already fits, state that plainly alongside the one-sentence requirement, any locked boundaries, and the planned file scope.
+
+When forked, present:
+
+- **Requirement**: the one-sentence current-state requirement and any locked boundaries.
+- **Fresh shape vs current shape**: brief summary of the proposed fresh shape (data model, interface, or control flow) and the concrete structural mismatches with current code.
+- **Patch path**: landing seam, touched files, structural cost, and consistency or experiment upsides.
+- **Fresh path**: concrete gain and full file-level blast radius (including siblings to align).
+- **Lean**: your evidence-based lean (**Patch** or **Fresh**), the code fact it hinges on, and which user-side factor (future plans, experimental risk, or schedule) flips the choice.
+
+Wait for the user to choose **Patch** or **Fresh** (when forked) and confirm the scope before modifying any file.
