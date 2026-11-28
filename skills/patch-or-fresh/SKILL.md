@@ -1,48 +1,46 @@
 ---
 name: patch-or-fresh
-description: Compare patching existing code against building fresh before editing, and settle the path and scope.
+description: Re-examine an upcoming change from zero against current requirements and sibling conventions before editing, then settle the shape and scope.
 disable-model-invocation: true
 ---
 
 # Patch or Fresh
 
-Decide before editing whether an upcoming change belongs on the **patch path** (extending the existing shape in place) or the **fresh path** (reshaping to the design you would author from zero for current requirements), and lock the resulting scope. Stay strictly read-only until the user confirms. Cite inspected files for every mismatch, constraint, caller, sibling, and scope item, and mark anything not read as `uninspected`.
+Stay read-only until the user confirms. Cite inspected files for every claim, boundary, and scope item; mark anything unread as `uninspected`.
 
 ## 1. Frame the requirement and locked boundaries
 
-State the upcoming change in one plain sentence describing the behavior and invariants the system needs now, independent of the current code layout. If the requirement is missing or too vague to design from zero, ask one focused question and wait.
+Define the upcoming change in one plain sentence describing the behavior and invariants the system needs now, independent of the current code layout or prior plan. If product direction or the requirement is unsettled or too vague to design from zero, ask one focused question and wait.
 
-Read the enclosing `AGENTS.md` (or `CLAUDE.md`), `docs/product-scope.md`, and directly relevant architecture docs (when present), plus any declared compatibility boundaries (public APIs, wire formats, persisted schemas). Separate **locked boundaries** (confirmed product rules and compatibility contracts) from internal legacy assumptions that are free to change.
+Read the enclosing `AGENTS.md` (or `CLAUDE.md`), `docs/product-scope.md`, and directly relevant architecture docs (when present), and note any declared compatibility boundaries (public APIs, wire formats, persisted schemas). Separate **locked boundaries** (confirmed product rules and compatibility contracts) from mutable internals.
 
-## 2. Sketch the fresh shape against reality
+## 2. Design from zero and audit against reality
 
-When this session has already proposed a plan, fix, or implementation anchored to existing code, dispatch this step to a read-only sub-agent with a **fresh context window** (never a fork inheriting parent context), passing only this step's instructions, the one-sentence requirement, the locked boundaries, and the target area (omitting prior design or implementation reasoning). Verify returned file claims before Step 3.
+When this session has already proposed a plan, fix, or implementation anchored to existing code, dispatch this step to a read-only sub-agent with a **fresh context window** (never a fork inheriting parent context), passing only this step, the requirement, locked boundaries, and target area (no prior plan or reasoning). Verify every returned file claim against the checkout before Step 3.
 
-Read the target files in full, their direct callers, owning tests, architecture docs, and sibling modules of the same kind. Test recorded rationale in inline comments and docs against current code to separate constraints that still hold from expired assumptions.
+Read the target files in full, plus their direct callers, owning tests, relevant architecture docs, and representative sibling modules of the same kind (when present; if fan-out is large, sample and mark unread areas `uninspected`).
 
-Sketch the **fresh shape**: the cleanest data model, interface, and control flow you would author from zero for the current requirement within locked boundaries. Compare it against current code to identify concrete structural mismatches (expired assumptions, forced special cases, split responsibilities, or mismatched tests and docs).
+1. **Sketch the fresh shape**: the cleanest data model, interface, validation, naming, and control flow you would author from zero for the current requirement within locked boundaries, aligned with sibling conventions.
+2. **Audit every mismatch**: compare the fresh shape against current code and reverse-check every awkward or seemingly redundant existing detail against actual callers, secondary paths, and recorded rationale. Classify each mismatch as **expired drift** (legacy assumptions, duplicate logic, split control flow, naming or type drift free to reshape) or a **load-bearing constraint** (hidden invariants, secondary contracts, or edge cases that must survive). If inspected code and docs still cannot settle whether an existing detail holds, flag it as an unverified assumption for Step 4 instead of guessing.
 
-## 3. Price both paths
+Done when every in-scope item above is inspected (or marked `uninspected`), and every mismatch is classified or flagged with file citations.
 
-If the current code already fits the fresh shape with no material structural mismatch, proceed directly to Step 4 with the planned file scope.
+## 3. Settle the landing mode
 
-Otherwise, base both paths on code facts, leaving future roadmap, experimental risk, and schedule for the user to weigh:
+Choose the landing mode from inspected code facts (plus any user-stated experimental or roadmap constraint), reserving a user fork for genuine cost-vs-quality trade-offs:
 
-- **Patch path**: exact landing seam and touched files (including callers, tests, and docs), concrete structural friction added (extra flags, branching, coupling, or awkward abstractions), and whether keeping the existing shape preserves **sibling consistency** across untouched peers or keeps an unvalidated experiment cheap.
-- **Fresh path**: concrete end-state gain (correctness, runtime quality or cost, or long-term simplicity) and full **blast radius** (every file, caller, interface, test, doc, and sibling module that must move together to keep conventions unified).
+- **Fits as-is**: current code matches the fresh shape with no material drift; proceed with the minimal file scope.
+- **Direct reshape**: reshaping to the fresh shape delivers clear net gain within roughly the same file set and negligible extra blast radius. Adopt the fresh shape directly instead of fabricating a strawman patch path.
+- **Scoped reshape**: a clean middle cut dominates: reshaping the core data model or interface pays off now, while sweeping untouched siblings or distant callers expands the blast radius disproportionately or outruns an unvalidated experiment. Define an explicit cut line: what reshapes now, what stays untouched, and what deferred debt remains.
+- **True fork**: no single path dominates: minimal landing adds concrete structural friction (flags, branching, coupling, split truths), while any clean reshape carries a genuinely wide blast radius (cross-module interfaces, many callers, sibling sweeps) or commits to an unvalidated direction. Price both paths concretely (exact touched files, structural friction of patching vs concrete end-state gain of reshaping, and blast-radius or reversibility risk) and pick an evidence-based lean.
 
-## 4. Hand off the decision
+## 4. Hand off for confirmation
 
-Reply concisely in the user's language.
+Reply concisely in the user's language, verdict and landing mode first:
 
-When the current shape already fits, state that plainly alongside the one-sentence requirement, any locked boundaries, and the planned file scope.
+- **Requirement & locked boundaries**: the one-sentence goal and hard constraints.
+- **Shape & surviving constraints**: for **Fits as-is**, state plainly that current code fits. Otherwise summarize the fresh shape, the concrete expired drift it clears, and any load-bearing constraints that must survive (plus the cut line and deferred debt for **Scoped reshape**).
+- **Scope (or both paths when forked)**: full file-level scope to confirm (target files, callers, tests, docs, and any siblings). Only under **True fork**, present both priced paths and your evidence-based lean.
+- **Assumptions to confirm** (omit if none): any unverified legacy behavior from Step 2, or external, roadmap, or schedule assumption that could overturn the shape, cut line, scope, or fork lean.
 
-When forked, present:
-
-- **Requirement**: the one-sentence current-state requirement and any locked boundaries.
-- **Fresh shape vs current shape**: brief summary of the proposed fresh shape (data model, interface, or control flow) and the concrete structural mismatches with current code.
-- **Patch path**: landing seam, touched files, structural cost, and consistency or experiment upsides.
-- **Fresh path**: concrete gain and full file-level blast radius (including siblings to align).
-- **Lean**: your evidence-based lean (**Patch** or **Fresh**), the code fact it hinges on, and which user-side factor (future plans, experimental risk, or schedule) flips the choice.
-
-Wait for the user to choose **Patch** or **Fresh** (when forked) and confirm the scope before modifying any file.
+Stop and wait for confirmation (or a path choice under **True fork**).
