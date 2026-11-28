@@ -95,6 +95,7 @@
 | Skill | 触发 | 作用 |
 |---|---|---|
 | [`where-are-we`](skills/where-are-we/SKILL.md) | 手动 | 检查当前会话是否偏离主目标，并及时调整方向 |
+| [`shut-up-meg`](skills/shut-up-meg/SKILL.md) | 手动 | 锁定当前会话全程用大白话、只输出必要信息，中途调用时顺手压缩上一条回复 |
 | [`wait-what`](skills/wait-what/SKILL.md) | 手动 | 上一条回复不够清晰时，结合 `GLOSSARY.md` 换更直白的方式重新解释 |
 | [`teach`](skills/teach/SKILL.md) | 手动 | 在当前工作区跨会话学习新概念或技能 |
 
